@@ -6,7 +6,6 @@ import matplotlib.pyplot as plt
 from sklearn.neural_network import MLPClassifier
 from sklearn.preprocessing import MinMaxScaler
 
-
 #a = np.ones((6,7))
 #print (a)   
 #gh.draw_game(a)
@@ -24,14 +23,7 @@ params = [{'solver': 'sgd', 'learning_rate': 'constant', 'momentum': 0,
            'learning_rate_init': 0.4},
           {'solver': 'sgd', 'learning_rate': 'constant', 'momentum': .0,
           'learning_rate_init': .0001},
-          {'solver': 'sgd', 'learning_rate': 'constant', 'momentum': .0,
-          'learning_rate_init': .0003},
-          {'solver': 'sgd', 'learning_rate': 'constant', 'momentum': .0,
-          'learning_rate_init': .0001},
-          {'solver': 'sgd', 'learning_rate': 'constant', 'momentum': .0,
-          'learning_rate_init': .0001},
-          {'solver': 'sgd', 'learning_rate': 'constant', 'momentum': .0,
-          'learning_rate_init': .0001},]
+        ]
 
 labels = ["high learning rate", "low learning rate ",
           "constant with Nesterov's momentum",

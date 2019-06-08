@@ -3,7 +3,7 @@ import numpy as np
 # -1 = black/O
 # 1 = white/X
 # blank space = 0
-# assuming the game is a top down matrix or array of 6*7 
+# assuming the game is a top down matrix or array of 6*7
 def draw_game(game):
     print(" \n \n ")
     counter = 0
@@ -39,6 +39,23 @@ def translate_game(game):
             board[position[i]][i] = -1
         player = player + 1
     #print (board)
+    return board
+
+def conv(c):
+    if c == 'o':
+        return -1
+    elif c == 'x':
+        return 1
+    elif c == 'b':
+        return 0
+    else:
+        return int(c)
+
+#x,b,c, (x2) ,win / ,draw / ,loss
+def translate_uci_game(game):
+    board = np.zeros((6, 7))
+    for i in range(0, 42):
+        board[i%6][i//7] = conv(game[i])
     return board
 
 
