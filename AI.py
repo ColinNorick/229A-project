@@ -53,8 +53,10 @@ def translate_data_to_multilabel(y):
 	Translates y data of the form:
 	-3 4 -3 -3 -3 2 0 (scores)
 	into y data of the form:
-	1 where the data is 1 for a forced win,
-	0 for a draw, and -1 for a forced loss
+	[0 1 0 0 0 1 0] where the data is 1 for
+	a move that acheives the best possible outcome,
+	and a 1 otherwise
+	
 	'''
 	for ranks in y:
 		max_ranks = find_all_moves_idx(board_ranks)
@@ -67,9 +69,8 @@ def translate_data_to_whowins(y):
 	Translates y data of the form:
 	-3 4 -3 -3 -3 2 0 (scores)
 	into y data of the form:
-	[0 1 0 0 0 1 0] where the data is 1 for
-	a move that acheives the best possible outcome,
-	and a 1 otherwise
+	1 where the data is 1 for a forced win,
+	0 for a draw, and -1 for a forced loss
 	'''
 	y2 = []
 	for ranks in y:
@@ -87,7 +88,7 @@ def mlp_ai(X, y):
 	mlp.fit(X_train, y_train)
 	print("Training set score: %f" % mlp.score(X_train, y_train))
 	print("Test set score: %f" % mlp.score(X_test, y_test))
-	
+
 	return mlp
 
 
