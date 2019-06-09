@@ -94,45 +94,52 @@ def mlp_ai(X, y, param):
 	return mlp
 
 def make_graphs(X, y):
-	params = [
+	params1 = [
 	{},
-	  {'hidden_layer_sizes': (100,),'learning_rate_init': .0001, 'activation' :'logistic'},
-	  #{'hidden_layer_sizes': (100, 50),'learning_rate_init': .0001, 'activation' :'logistic'},
-	  #{'hidden_layer_sizes': (100, 100),'learning_rate_init': .0001, 'activation' :'logistic'},
-	  #{'hidden_layer_sizes': (100, 200),'learning_rate_init': .0001, 'activation' :'logistic'},
-
-	  {'hidden_layer_sizes': (100,),'learning_rate_init': .0001, 'activation' :'tanh'},
-	  #{'hidden_layer_sizes': (100,),'learning_rate_init': .0001, 'activation' :'tanh'},
-	  #{'hidden_layer_sizes': (100,),'learning_rate_init': .0001, 'activation' :'tanh'},
-	  #{'hidden_layer_sizes': (100,),'learning_rate_init': .0001, 'activation' :'tanh'},
-
-	  {'hidden_layer_sizes': (100,),'learning_rate_init': .0001, 'activation' :'relu'},
-
+	  {'hidden_layer_sizes': (100,50),'learning_rate_init': .001, 'activation' :'relu'},
+	  {'hidden_layer_sizes': (100,100),'learning_rate_init': .001, 'activation' :'relu'},
+	  {'hidden_layer_sizes': (100,150),'learning_rate_init': .001, 'activation' :'relu'},
+	  {'hidden_layer_sizes': (100,200),'learning_rate_init': .001, 'activation' :'relu'},
+	  {'hidden_layer_sizes': (50,100),'learning_rate_init': .001, 'activation' :'relu'},
+	  {'hidden_layer_sizes': (150,100),'learning_rate_init': .001, 'activation' :'relu'},
+	  {'hidden_layer_sizes': (200, 100),'learning_rate_init': .001, 'activation' :'relu'},
 	]
 
-	labels = ["default", "logistic", "tanh","relu",
+	params2 = [
+	{'hidden_layer_sizes': (100,50),'learning_rate_init': .001},
+	  {'hidden_layer_sizes': (100,100),'learning_rate_init': .001},
+	  {'hidden_layer_sizes': (100,150),'learning_rate_init': .001},
+	  {'hidden_layer_sizes': (100,200),'learning_rate_init': .001},
+	  {'hidden_layer_sizes': (50,100),'learning_rate_init': .001},
+	  {'hidden_layer_sizes': (150,100),'learning_rate_init': .001},
+	  {'hidden_layer_sizes': (200, 100),'learning_rate_init': .001},
+	]
+
+	labels = ["100,50","100,100","100,150","100,200","50,100","150,100","200,100",
 	  ]
 
 	plot_args = [{'c': 'red', 'linestyle': '-'},
-	 {'c': 'green', 'linestyle': '-'},
-	 {'c': 'black', 'linestyle': '-'},
-	 {'c': 'orange', 'linestyle': '-'},
-	 ]
+             {'c': 'green', 'linestyle': '-'},
+             {'c': 'blue', 'linestyle': '-'},
+             {'c': 'red', 'linestyle': '--'},
+             {'c': 'green', 'linestyle': '--'},
+             {'c': 'blue', 'linestyle': '--'},
+             {'c': 'black', 'linestyle': '-'}]
 
-	# for each dataset, plot learning for each learning strategy
+	params_list = [params1, params2]
+
 	fig, axes = plt.subplots(2, 2, figsize=(15, 10))
-	#for ax, name in zip(axes.ravel(), ['Loss of different Archectectures', 'Low Learning Rate']):
-	ax = axes.ravel()[0]	
-	ax.set_title("Loss of different Archectectures")
-	#X = MinMaxScaler().fit_transform(X)
-	mlps = []
-	for label, param in zip(labels, params):
-		print("training: %s" % label)
-		mlp = mlp_ai(X, y, param)	  
-		mlps.append(mlp)
+	for ax, name, params in zip(axes.ravel(), ['Relu Layers', 'Default Layers'], params_list):	
+		ax.set_title(name)
+		#X = MinMaxScaler().fit_transform(X)
+		mlps = []
+		for label, param in zip(labels, params):
+			print("training: %s" % label)
+			mlp = mlp_ai(X, y, param)	  
+			mlps.append(mlp)
 	
-	for mlp, label, args in zip(mlps, labels, plot_args):
-		ax.plot(mlp.loss_curve_, label=label, **args)
+		for mlp, label, args in zip(mlps, labels, plot_args):
+			ax.plot(mlp.loss_curve_, label=label, **args)
 
 	fig.legend(ax.get_lines(), labels, ncol=3, loc="upper center")
 	plt.show()
