@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.neural_network import MLPClassifier
 from sklearn.preprocessing import MultiLabelBinarizer
+from sklearn.model_selection import learning_curve
+from sklearn.model_selection import ShuffleSplit
 import pickle
 
 def undo_what_we_did_before(pos, board_rank):
@@ -81,28 +83,23 @@ def translate_data_to_whowins(y):
 	return y2
 
 def mlp_ai(X, y, param):
-	print("Small subset of data")
-	print(X[:5])
-	print(y[:5])
+
 	X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=42)
 	#param={'max_iter' : 250, 'hidden_layer_sizes': (100, 50)}
 	mlp = MLPClassifier(**param)
 	mlp.fit(X_train, y_train)
 	print("Training set score: %f" % mlp.score(X_train, y_train))
 	print("Test set score: %f" % mlp.score(X_test, y_test))
-
+	
 	return mlp
 
 def make_graphs(X, y):
 	params1 = [
-	{},
-	  {'hidden_layer_sizes': (100,50),'learning_rate_init': .001, 'activation' :'relu', 'early_stopping': True},
-	  {'hidden_layer_sizes': (100,100),'learning_rate_init': .001, 'activation' :'relu', 'early_stopping': True},
-	  {'hidden_layer_sizes': (100,150),'learning_rate_init': .001, 'activation' :'relu', 'early_stopping': True},
-	  {'hidden_layer_sizes': (100,200),'learning_rate_init': .001, 'activation' :'relu', 'early_stopping': True},
-	  {'hidden_layer_sizes': (50,100),'learning_rate_init': .001, 'activation' :'relu', 'early_stopping': True},
-	  {'hidden_layer_sizes': (150,100),'learning_rate_init': .001, 'activation' :'relu', 'early_stopping': True},
-	  {'hidden_layer_sizes': (200, 100),'learning_rate_init': .001, 'activation' :'relu', 'early_stopping': True},
+	  {},
+	  {'hidden_layer_sizes': (100,100,100),'learning_rate_init': .001},
+	  {'hidden_layer_sizes': (100,100,100,100),'learning_rate_init': .001},
+	  {'hidden_layer_sizes': (100,100,100,100,100),'learning_rate_init': .001},
+	  {'hidden_layer_sizes': (50,50,50,50,50,50,50),'learning_rate_init': .001},
 	]
 
 	params2 = [
@@ -115,7 +112,7 @@ def make_graphs(X, y):
 	  {'hidden_layer_sizes': (200, 100),'learning_rate_init': .001, 'early_stopping': True},
 	]
 
-	labels = ["100,50","100,100","100,150","100,200","50,100","150,100","200,100",
+	labels = ["Default","100,100,100","100,100,100,100","100,100,100,100,100","50,50,50,50,50,50,50",
 	  ]
 
 	plot_args = [{'c': 'red', 'linestyle': '-'},
@@ -124,42 +121,103 @@ def make_graphs(X, y):
              {'c': 'red', 'linestyle': '--'},
              {'c': 'green', 'linestyle': '--'},
              {'c': 'blue', 'linestyle': '--'},
-             {'c': 'black', 'linestyle': '-'}]
+             {'c': 'black', 'linestyle': '-'},
+             {'c': 'orange', 'linestyle': '-'}]
 
 	params_list = [params1, params2]
 
-	fig, axes = plt.subplots(2, 2, figsize=(15, 10))
-	for ax, name, params in zip(axes.ravel(), ['Relu Layers', 'Default Layers'], params_list):	
-		ax.set_title(name)
-		#X = MinMaxScaler().fit_transform(X)
-		mlps = []
-		for label, param in zip(labels, params):
-			print("training: %s" % label)
-			mlp = mlp_ai(X, y, param)	  
-			mlps.append(mlp)
+	#fig, axes = plt.subplots(2, 2, figsize=(15, 10))
+	plt.figure()
+	#for ax, name, params in zip(axes.ravel(), ['Relu Layers', 'Default Layers'], params_list):	
+	plt.title("Neural Network Loss Curves")
+	#X = MinMaxScaler().fit_transform(X)
+	mlps = []
+	for label, param in zip(labels, params1):
+		print("training: %s" % label)
+		mlp = mlp_ai(X, y, param)	  
+		mlps.append(mlp)
 	
-		for mlp, label, args in zip(mlps, labels, plot_args):
-			ax.plot(mlp.loss_curve_, label=label, **args)
+	for mlp, label, args in zip(mlps, labels, plot_args):
+		plt.plot(mlp.loss_curve_, label=label, **args)
 
-		if params == params1:
-			ax = axes.ravel()[2]
-			ax.set_title("Relu_Layers_validation loss")
-			for mlp, label, args in zip(mlps, labels, plot_args):
-				ax.plot(mlp.validation_scores_, label=label, **args)
-		elif params == params2:
-			ax = axes.ravel()[3]
-			ax.set_title("Default_Layers_validation loss")
-			for mlp, label, args in zip(mlps, labels, plot_args):
-				ax.plot(mlp.validation_scores_, label=label, **args)
+		# if params == params1:
+		# 	ax = axes.ravel()[2]
+		# 	ax.set_title("Relu_Layers_validation loss")
+		# 	for mlp, label, args in zip(mlps, labels, plot_args):
+		# 		ax.plot(mlp.validation_scores_, label=label, **args)
+		# elif params == params2:
+		# 	ax = axes.ravel()[3]
+		# 	ax.set_title("Default_Layers_validation loss")
+		# 	for mlp, label, args in zip(mlps, labels, plot_args):
+		# 		ax.plot(mlp.validation_scores_, label=label, **args)
 
 	
 	mlp_list = open('mlp_list', 'ab') 
     # source, destination 
 	pickle.dump(mlps, mlp_list)                      
-	dbfile.close()	
+	mlp_list.close()	
 
-	fig.legend(ax.get_lines(), labels, ncol=3, loc="upper center")
+	plt.legend(labels, ncol=3, loc="upper center")
+	plt.xlabel("Iterations")
+	plt.ylabel("Loss")
 	plt.show()
+
+# from skikit-learn
+def plot_learning_curve(estimator, title, X, y, ylim=None, cv=None,
+                        n_jobs=None, train_sizes=np.linspace(.1, 1.0, 5)):
+ 
+    plt.figure()
+    plt.title(title)
+    if ylim is not None:
+        plt.ylim(*ylim)
+    plt.xlabel("Training examples")
+    plt.ylabel("Score")
+    train_sizes, train_scores, test_scores = learning_curve(
+        estimator, X, y, cv=cv, n_jobs=n_jobs, train_sizes=train_sizes)
+    train_scores_mean = np.mean(train_scores, axis=1)
+    train_scores_std = np.std(train_scores, axis=1)
+    test_scores_mean = np.mean(test_scores, axis=1)
+    test_scores_std = np.std(test_scores, axis=1)
+    plt.grid()
+
+    plt.fill_between(train_sizes, train_scores_mean - train_scores_std,
+                     train_scores_mean + train_scores_std, alpha=0.001,
+                     color="r")
+    plt.fill_between(train_sizes, test_scores_mean - test_scores_std,
+                     test_scores_mean + test_scores_std, alpha=0.001, color="g")
+    plt.plot(train_sizes, train_scores_mean, 'o-', color="r",
+             label="Training score")
+    plt.plot(train_sizes, test_scores_mean, 'o-', color="g",
+             label="Cross-validation score")
+
+    plt.legend(loc="best")
+    return plt
+
+
+def plot():
+	labels = ["Default","100,50","100,100","100,150","100,200","50,100","150,100","200,100",
+	  ]
+
+	plot_args = [{'c': 'red', 'linestyle': '-'},
+             {'c': 'green', 'linestyle': '-'},
+             {'c': 'blue', 'linestyle': '-'},
+             {'c': 'red', 'linestyle': '--'},
+             {'c': 'green', 'linestyle': '--'},
+             {'c': 'blue', 'linestyle': '--'},
+             {'c': 'black', 'linestyle': '-'},
+             {'c': 'orange', 'linestyle': '-'}]
+	plt.figure()
+	plt.title("Neural Network Loss Curves")
+
+	data = open('mlplist', 'rb')
+
+	# dump information to that file
+	mlp_list = pickle.load(data)
+
+	# close the file
+	mlp_list.close()
+	for mlp, label, args in zip(mlps, labels, plot_args):
+		plt.plot(mlp.loss_curve_, label=label, **args)
 
 
 def main():
@@ -180,7 +238,10 @@ def main():
 	# mlp = mlp_ai(X, y_whowins)
 	# with open('mlp-trained-bulk-multilabel.mlp', 'wb') as f:
 	# 	pickle.dump(mlp, f)
-
+	#title = "test"
+	#estimator = MLPClassifier(max_iter = 1800, alpha = .000001)
+	#plot_learning_curve(estimator, title, X, y_whowins, cv = 5, n_jobs=-1)
+	plt.show()
 
 
 if __name__ == '__main__':
