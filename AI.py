@@ -96,23 +96,23 @@ def mlp_ai(X, y, param):
 def make_graphs(X, y):
 	params1 = [
 	{},
-	  {'hidden_layer_sizes': (100,50),'learning_rate_init': .001, 'activation' :'relu'},
-	  {'hidden_layer_sizes': (100,100),'learning_rate_init': .001, 'activation' :'relu'},
-	  {'hidden_layer_sizes': (100,150),'learning_rate_init': .001, 'activation' :'relu'},
-	  {'hidden_layer_sizes': (100,200),'learning_rate_init': .001, 'activation' :'relu'},
-	  {'hidden_layer_sizes': (50,100),'learning_rate_init': .001, 'activation' :'relu'},
-	  {'hidden_layer_sizes': (150,100),'learning_rate_init': .001, 'activation' :'relu'},
-	  {'hidden_layer_sizes': (200, 100),'learning_rate_init': .001, 'activation' :'relu'},
+	  {'hidden_layer_sizes': (100,50),'learning_rate_init': .001, 'activation' :'relu', 'early_stopping': True},
+	  {'hidden_layer_sizes': (100,100),'learning_rate_init': .001, 'activation' :'relu', 'early_stopping': True},
+	  {'hidden_layer_sizes': (100,150),'learning_rate_init': .001, 'activation' :'relu', 'early_stopping': True},
+	  {'hidden_layer_sizes': (100,200),'learning_rate_init': .001, 'activation' :'relu', 'early_stopping': True},
+	  {'hidden_layer_sizes': (50,100),'learning_rate_init': .001, 'activation' :'relu', 'early_stopping': True},
+	  {'hidden_layer_sizes': (150,100),'learning_rate_init': .001, 'activation' :'relu', 'early_stopping': True},
+	  {'hidden_layer_sizes': (200, 100),'learning_rate_init': .001, 'activation' :'relu', 'early_stopping': True},
 	]
 
 	params2 = [
-	{'hidden_layer_sizes': (100,50),'learning_rate_init': .001},
-	  {'hidden_layer_sizes': (100,100),'learning_rate_init': .001},
-	  {'hidden_layer_sizes': (100,150),'learning_rate_init': .001},
-	  {'hidden_layer_sizes': (100,200),'learning_rate_init': .001},
-	  {'hidden_layer_sizes': (50,100),'learning_rate_init': .001},
-	  {'hidden_layer_sizes': (150,100),'learning_rate_init': .001},
-	  {'hidden_layer_sizes': (200, 100),'learning_rate_init': .001},
+	{'hidden_layer_sizes': (100,50),'learning_rate_init': .001, 'early_stopping': True},
+	  {'hidden_layer_sizes': (100,100),'learning_rate_init': .001, 'early_stopping': True},
+	  {'hidden_layer_sizes': (100,150),'learning_rate_init': .001, 'early_stopping': True},
+	  {'hidden_layer_sizes': (100,200),'learning_rate_init': .001, 'early_stopping': True},
+	  {'hidden_layer_sizes': (50,100),'learning_rate_init': .001, 'early_stopping': True},
+	  {'hidden_layer_sizes': (150,100),'learning_rate_init': .001, 'early_stopping': True},
+	  {'hidden_layer_sizes': (200, 100),'learning_rate_init': .001, 'early_stopping': True},
 	]
 
 	labels = ["100,50","100,100","100,150","100,200","50,100","150,100","200,100",
@@ -140,6 +140,23 @@ def make_graphs(X, y):
 	
 		for mlp, label, args in zip(mlps, labels, plot_args):
 			ax.plot(mlp.loss_curve_, label=label, **args)
+
+		if params == params1:
+			ax = axes.ravel()[2]
+			ax.set_title("Relu_Layers_validation loss")
+			for mlp, label, args in zip(mlps, labels, plot_args):
+				ax.plot(mlp.validation_scores_, label=label, **args)
+		elif params == params2:
+			ax = axes.ravel()[3]
+			ax.set_title("Default_Layers_validation loss")
+			for mlp, label, args in zip(mlps, labels, plot_args):
+				ax.plot(mlp.validation_scores_, label=label, **args)
+
+	
+	mlp_list = open('mlp_list', 'ab') 
+    # source, destination 
+	pickle.dump(mlps, mlp_list)                      
+	dbfile.close()	
 
 	fig.legend(ax.get_lines(), labels, ncol=3, loc="upper center")
 	plt.show()
