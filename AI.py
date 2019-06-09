@@ -1,6 +1,7 @@
 import sklearn
 import board_conversions as bc
 import numpy as np
+import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.neural_network import MLPClassifier
 from sklearn.preprocessing import MultiLabelBinarizer
@@ -58,9 +59,9 @@ def translate_data_to_multilabel(y):
 	and a 1 otherwise
 	
 	'''
-	for ranks in y:
-		max_ranks = find_all_moves_idx(board_ranks)
-		y.append(max_ranks)
+	for rank in y:
+		max_ranks = find_all_moves_idx(rank)
+		y.append(max_ranks)	
 	mlb = MultiLabelBinarizer()
 	y2 = mlb.fit_transform(y)
 
@@ -73,17 +74,18 @@ def translate_data_to_whowins(y):
 	0 for a draw, and -1 for a forced loss
 	'''
 	y2 = []
-	for ranks in y:
-		winner = who_wins(board_ranks)
+	for rank in y:
+		winner = who_wins(rank)
 		y2.append(winner)
 
+	return y2
 
-def mlp_ai(X, y):
-	X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=42)
+def mlp_ai(X, y, param):
 	print("Small subset of data")
 	print(X[:5])
 	print(y[:5])
-	param={'max_iter' : 250, 'hidden_layer_sizes': (100, 50)}
+	X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=42)
+	#param={'max_iter' : 250, 'hidden_layer_sizes': (100, 50)}
 	mlp = MLPClassifier(**param)
 	mlp.fit(X_train, y_train)
 	print("Training set score: %f" % mlp.score(X_train, y_train))
@@ -91,20 +93,69 @@ def mlp_ai(X, y):
 
 	return mlp
 
+def make_graphs(X, y):
+	params = [
+	{},
+	  {'hidden_layer_sizes': (100,),'learning_rate_init': .0001, 'activation' :'logistic'},
+	  #{'hidden_layer_sizes': (100, 50),'learning_rate_init': .0001, 'activation' :'logistic'},
+	  #{'hidden_layer_sizes': (100, 100),'learning_rate_init': .0001, 'activation' :'logistic'},
+	  #{'hidden_layer_sizes': (100, 200),'learning_rate_init': .0001, 'activation' :'logistic'},
+
+	  {'hidden_layer_sizes': (100,),'learning_rate_init': .0001, 'activation' :'tanh'},
+	  #{'hidden_layer_sizes': (100,),'learning_rate_init': .0001, 'activation' :'tanh'},
+	  #{'hidden_layer_sizes': (100,),'learning_rate_init': .0001, 'activation' :'tanh'},
+	  #{'hidden_layer_sizes': (100,),'learning_rate_init': .0001, 'activation' :'tanh'},
+
+	  {'hidden_layer_sizes': (100,),'learning_rate_init': .0001, 'activation' :'relu'},
+
+	]
+
+	labels = ["default", "logistic", "tanh","relu",
+	  ]
+
+	plot_args = [{'c': 'red', 'linestyle': '-'},
+	 {'c': 'green', 'linestyle': '-'},
+	 {'c': 'black', 'linestyle': '-'},
+	 {'c': 'orange', 'linestyle': '-'},
+	 ]
+
+	# for each dataset, plot learning for each learning strategy
+	fig, axes = plt.subplots(2, 2, figsize=(15, 10))
+	#for ax, name in zip(axes.ravel(), ['Loss of different Archectectures', 'Low Learning Rate']):
+	ax = axes.ravel()[0]	
+	ax.set_title("Loss of different Archectectures")
+	#X = MinMaxScaler().fit_transform(X)
+	mlps = []
+	for label, param in zip(labels, params):
+		print("training: %s" % label)
+		mlp = mlp_ai(X, y, param)	  
+		mlps.append(mlp)
+	
+	for mlp, label, args in zip(mlps, labels, plot_args):
+		ax.plot(mlp.loss_curve_, label=label, **args)
+
+	fig.legend(ax.get_lines(), labels, ncol=3, loc="upper center")
+	plt.show()
+
 
 def main():
+	print('getting data!')
 	X,y = get_data('bulk_one-ALL.csv')
+	print('traslating data!')
 	y_whowins = translate_data_to_whowins(y)
-	y_multilabel = translate_data_to_multilabel(y)
-	print('starting mlp whowins!')
-	mlp = mlp_ai(X, y_whowins)
-	with open('mlp-trained-bulk-whowins.mlp', 'wb') as f:
-		pickle.dump(mlp, f)
+	# print(y_whowins)
+	print('Doing the actual work now!')
+	make_graphs(X, y_whowins)
+	#y_multilabel = translate_data_to_multilabel(y)
+	#print('starting mlp whowins!')
+	# mlp = mlp_ai(X, y_whowins)
+	# with open('mlp-trained-bulk-whowins.mlp', 'wb') as f:
+	# 	pickle.dump(mlp, f)
 
-	print('starting mlp multilabel!')
-	mlp = mlp_ai(X, y_whowins)
-	with open('mlp-trained-bulk-multilabel.mlp', 'wb') as f:
-		pickle.dump(mlp, f)
+	# print('starting mlp multilabel!')
+	# mlp = mlp_ai(X, y_whowins)
+	# with open('mlp-trained-bulk-multilabel.mlp', 'wb') as f:
+	# 	pickle.dump(mlp, f)
 
 
 
